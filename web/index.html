@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1a0514" />
+  <meta name="description" content="Syed MD WhatsApp web pairing portal" />
+  <title>Syed MD — Web Pairing Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink:#fff0f8;
+      --muted:#e0b0d0;
+      --purple:#ff00e5;
+      --violet:#bd00ff;
+      --hot:#ff69b4;
+      --line:rgba(255,105,180,.28);
+      --panel:rgba(26,5,20,.77);
+      --green:#ff85e4;
+      --red:#ff1493;
+    }
+    * { box-sizing:border-box; }
+    html { min-width:320px; background:#1a0514; }
+    body { margin:0; min-height:100vh; color:var(--ink); background:#1a0514; font-family:Manrope,system-ui,sans-serif; overflow-x:hidden; }
+    body:before { content:""; position:fixed; inset:0; z-index:-3; background-image:linear-gradient(180deg,rgba(26,5,20,.3) 0%,rgba(40,10,30,.75) 70%,#1a0514 100%),linear-gradient(90deg,rgba(30,5,22,.92) 0%,rgba(50,10,40,.3) 50%,rgba(30,5,22,.85) 100%),url('/assets/syed-dp.png'); background-position:center top; background-size:cover; background-repeat:no-repeat; filter:saturate(1.4); }
+    body:after { content:""; position:fixed; inset:0; z-index:-2; pointer-events:none; background:radial-gradient(circle at 78% 20%,rgba(255,0,230,.35),transparent 28%),radial-gradient(circle at 30% 78%,rgba(189,0,255,.28),transparent 32%); mix-blend-mode:screen; }
+    .page { width:min(1180px,100%); margin:auto; padding:22px 28px 35px; }
+    .quote { display:flex; align-items:center; justify-content:center; gap:18px; padding:11px 18px; border:1px solid rgba(255,105,180,.22); border-radius:999px; background:rgba(26,5,20,.5); color:#ffd6f0; font-family:Georgia,serif; font-size:12px; letter-spacing:.22em; text-align:center; text-transform:uppercase; box-shadow:0 0 42px rgba(255,0,230,.18); backdrop-filter:blur(14px); }
+    .quote:before,.quote:after { content:""; width:34px; height:1px; background:linear-gradient(90deg,transparent,var(--purple)); } .quote:after { background:linear-gradient(90deg,var(--purple),transparent); }
+    header { display:flex; align-items:center; justify-content:space-between; padding:28px 0 56px; }
+    .identity { display:flex; align-items:center; gap:13px; }
+    .avatar { width:50px; height:50px; border:1px solid rgba(255,150,220,.75); border-radius:50%; object-fit:cover; object-position:center; box-shadow:0 0 0 4px rgba(255,0,230,.18),0 0 32px rgba(255,20,200,.5); }
+    .brand { font-size:13px; font-weight:800; line-height:1.2; letter-spacing:.19em; } .brand small { display:block; color:#d4a0c0; font-size:9px; font-weight:500; letter-spacing:.25em; margin-top:7px; }
+    .status { display:flex; align-items:center; gap:9px; padding:10px 14px; border:1px solid rgba(255,133,228,.22); border-radius:99px; background:rgba(30,10,26,.45); color:#ffd0f0; font-size:11px; letter-spacing:.08em; text-transform:uppercase; }
+    .status i { width:7px; height:7px; border-radius:50%; background:#ff85e4; box-shadow:0 0 16px #ff85e4; }
+    main { display:grid; grid-template-columns:minmax(0,1.08fr) minmax(370px,.92fr); gap:72px; align-items:center; }
+    .hero { position:relative; padding:15px 0 20px; } .kicker { margin:0 0 19px; color:var(--purple); font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.3em; text-transform:uppercase; } h1 { max-width:690px; margin:0; font-size:clamp(44px,6.4vw,82px); line-height:.98; letter-spacing:-.07em; } h1 .shine { display:block; color:#ffc4e6; text-shadow:0 0 24px rgba(255,105,180,.35); } .hero-copy { max-width:520px; margin:27px 0 33px; color:var(--muted); font-size:15px; line-height:1.8; } .hero-art { position:relative; width:min(310px,55vw); aspect-ratio:1; margin:27px 0 30px 4px; border:1px solid rgba(255,150,220,.4); border-radius:50%; padding:9px; background:linear-gradient(135deg,rgba(255,105,180,.3),rgba(120,20,100,.1)); box-shadow:0 0 0 8px rgba(255,0,200,.1),0 0 60px rgba(255,20,180,.35); } .hero-art:after { content:'SYED'; position:absolute; right:-25px; bottom:15px; color:#ffc4e6; font:700 13px 'DM Mono',monospace; letter-spacing:.3em; text-shadow:0 0 14px rgba(255,105,180,.85); } .hero-art img { width:100%; height:100%; display:block; border-radius:50%; object-fit:cover; object-position:center; filter:saturate(1.3) contrast(1.08); }
+    .proof { display:flex; flex-wrap:wrap; gap:10px; } .proof span { display:inline-flex; align-items:center; gap:8px; color:#f0cce6; border:1px solid rgba(255,150,220,.2); border-radius:8px; background:rgba(35,10,28,.55); padding:10px 12px; font-size:11px; } .proof b { color:var(--purple); font-size:14px; }
+    .pair-card { position:relative; padding:28px; border:1px solid var(--line); border-radius:27px; background:linear-gradient(145deg,rgba(45,10,35,.9),rgba(20,5,18,.8)); box-shadow:0 24px 80px rgba(0,0,0,.55),inset 0 1px rgba(255,200,230,.12); backdrop-filter:blur(24px); overflow:hidden; } .pair-card:before { content:""; position:absolute; top:-115px; right:-80px; width:240px; height:240px; border-radius:50%; background:rgba(255,0,230,.32); filter:blur(60px); pointer-events:none; }
+    .card-top { position:relative; display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:26px; } .card-kicker { margin:0 0 8px; color:#e0a0cc; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.22em; text-transform:uppercase; } h2 { margin:0; font-size:25px; letter-spacing:-.05em; } .spark { width:40px; height:40px; display:grid; place-items:center; border:1px solid rgba(255,105,180,.45); border-radius:12px; background:linear-gradient(135deg,rgba(255,0,230,.35),rgba(150,30,130,.15)); color:#ffc4e6; font-size:19px; }
+    label { display:block; margin:0 0 10px; color:#f5d0ec; font-size:12px; font-weight:700; letter-spacing:.02em; } .input-shell { display:flex; direction:ltr; align-items:center; border:1px solid rgba(255,150,220,.3); border-radius:14px; background:rgba(30,5,22,.6); transition:border-color .2s,box-shadow .2s; } .input-shell:focus-within { border-color:var(--purple); box-shadow:0 0 0 4px rgba(255,0,230,.14),0 0 25px rgba(255,20,200,.22); } .plus { padding:0 12px; color:#d080c0; font-family:'DM Mono',monospace; font-size:14px; border-right:1px solid rgba(255,150,220,.2); } input { flex:1; min-width:0; border:0; outline:0; padding:15px 13px; color:#fff; background:transparent; font:500 14px 'DM Mono',monospace; letter-spacing:.05em; } input::placeholder { color:#a06090; }
+    .helper { margin:10px 0 0; color:#c080b0; font-size:11px; line-height:1.6; } #pairBtn { position:relative; width:100%; margin-top:19px; padding:16px 18px; border:1px solid rgba(255,200,230,.5); border-radius:13px; color:#1a0514; background:linear-gradient(105deg,#ff85e4,#bd00ff 55%,#ffc4e6); box-shadow:0 10px 35px rgba(255,0,230,.32); font:800 13px Manrope,sans-serif; cursor:pointer; transition:transform .16s,filter .2s,opacity .2s; } #pairBtn:after { content:"↗"; position:absolute; right:18px; font-size:18px; } #pairBtn:hover { filter:brightness(1.12); box-shadow:0 13px 40px rgba(255,20,200,.45); } #pairBtn:active { transform:scale(.98); } #pairBtn:disabled { opacity:.6; cursor:wait; }
+    .status-text { min-height:20px; margin:17px 2px 0; color:#c090b0; font-size:11px; } .status-text.success { color:var(--green); } .status-text.error { color:var(--red); }
+    .result { display:none; margin-top:17px; padding:16px; border:1px solid rgba(255,133,228,.28); border-radius:15px; background:rgba(60,15,50,.12); animation:rise .25s ease-out; } .result.show { display:block; } .result-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; } .result-head strong { color:var(--green); font-size:12px; } .timer { color:#e0a0c8; font:11px 'DM Mono',monospace; } .code-row { display:flex; direction:ltr; gap:8px; } .code { flex:1; min-width:0; padding:14px 8px; border-radius:10px; color:#fff; background:rgba(0,0,0,.32); text-align:center; font:700 21px 'DM Mono',monospace; letter-spacing:.15em; } #copyBtn { padding:0 14px; border:0; border-radius:10px; color:#1a0514; background:var(--green); font:800 11px Manrope,sans-serif; cursor:pointer; } #copyBtn.copied { background:#ffe0f5; }
+    .instructions { display:flex; align-items:flex-start; gap:10px; margin-top:21px; padding-top:17px; border-top:1px solid rgba(255,150,220,.16); color:#c090b0; font-size:10px; line-height:1.65; } .instructions b { color:#f0b0d8; font-size:13px; } footer { display:flex; justify-content:space-between; gap:20px; margin-top:78px; padding-top:16px; border-top:1px solid rgba(255,150,220,.18); color:#a07090; font:10px 'DM Mono',monospace; letter-spacing:.12em; text-transform:uppercase; } footer span:last-child { color:#d080c0; }
+    @keyframes rise { from { opacity:0; transform:translateY(7px); } to { opacity:1; transform:translateY(0); } }
+    @media (max-width:860px) { .page { padding:18px 18px 28px; } .quote { font-size:10px; letter-spacing:.12em; } header { padding:24px 0 42px; } main { grid-template-columns:1fr; gap:35px; } .hero { text-align:center; padding:4px 0 0; } h1,.hero-copy { margin-left:auto; margin-right:auto; } .hero-art { margin:26px auto 28px; } .proof { justify-content:center; } .pair-card { width:min(100%,560px); margin:auto; } footer { margin-top:50px; } }
+    @media (max-width:500px) { .page { padding-inline:14px; } .quote { gap:7px; padding:10px 8px; font-size:8px; letter-spacing:.08em; } .quote:before,.quote:after { width:16px; } header { padding:22px 0 34px; } .avatar { width:44px; height:44px; } .brand { font-size:11px; } .status { padding:8px 10px; font-size:9px; } .status i { width:6px; height:6px; } h1 { font-size:clamp(43px,14vw,62px); } .hero-copy { margin-top:22px; font-size:13px; } .pair-card { padding:22px 17px; border-radius:21px; } h2 { font-size:22px; } footer { flex-direction:column; gap:8px; text-align:center; } }
+    @media (prefers-reduced-motion:reduce) { *,*:before,*:after { scroll-behavior:auto!important; animation:none!important; transition:none!important; } }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="quote">Allah is with me, who has the courage to defeat me?</div>
+    <header>
+      <div class="identity"><img class="avatar" src="/assets/syed-dp.png" alt="Syed profile" /><div class="brand">SYED MD<small>WEB PAIRING PORTAL</small></div></div>
+      <div class="status"><i></i> System online</div>
+    </header>
+    <main>
+      <section class="hero">
+        <p class="kicker">// Secure connection layer</p>
+        <h1>Pair your<br><span class="shine">WhatsApp.</span></h1>
+        <div class="hero-art"><img src="/assets/syed-dp.png" alt="Syed DP artwork" /></div>
+        <p class="hero-copy">Enter your WhatsApp number and receive a pairing code in seconds. The original pairing method stays untouched—only the experience is now cleaner, faster, and completely web-based.</p>
+        <div class="proof"><span><b>✦</b> Same pairing flow</span><span><b>⌁</b> Mobile ready</span><span><b>◉</b> Instant code</span></div>
+      </section>
+      <section class="pair-card" aria-label="WhatsApp pairing form">
+        <div class="card-top"><div><p class="card-kicker">Start a new session</p><h2>Connect your number</h2></div><div class="spark">✦</div></div>
+        <form id="pairForm">
+          <label for="number">WhatsApp number</label>
+          <div class="input-shell"><span class="plus">+</span><input id="number" name="number" inputmode="numeric" autocomplete="tel" maxlength="15" placeholder="923001234567" required /></div>
+          <p class="helper">Use the international format without spaces or a leading zero.</p>
+          <button id="pairBtn" type="submit">Generate pairing code</button>
+        </form>
+        <div id="status" class="status-text" role="status" aria-live="polite"></div>
+        <div id="result" class="result"><div class="result-head"><strong>Pairing code ready</strong><span id="timer" class="timer">02:00</span></div><div class="code-row"><div id="code" class="code">----</div><button id="copyBtn" type="button">Copy</button></div></div>
+        <div class="instructions"><b>i</b><span>Open WhatsApp → Settings → Linked Devices → Link a Device, then enter the code above. The code expires in 2 minutes.</span></div>
+      </section>
+    </main>
+    <footer><span>Syed MD / Web Interface</span><span>Built for a seamless connection</span></footer>
+  </div>
+  <script>
+    const form=document.getElementById('pairForm'), input=document.getElementById('number'), button=document.getElementById('pairBtn'), status=document.getElementById('status'), result=document.getElementById('result'), codeEl=document.getElementById('code'), copyBtn=document.getElementById('copyBtn'), timerEl=document.getElementById('timer'); let timer;
+    function setStatus(text,type=''){ status.textContent=text; status.className='status-text '+type; }
+    function startTimer(seconds){ clearInterval(timer); let left=seconds; const tick=()=>{ timerEl.textContent=String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0'); if(left<=0) clearInterval(timer); left--; }; tick(); timer=setInterval(tick,1000); }
+    form.addEventListener('submit',async event=>{ event.preventDefault(); result.classList.remove('show'); setStatus('Generating your pairing code…'); button.disabled=true; button.textContent='Generating code…'; try{ const response=await fetch('/api/pair',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({number:input.value})}); const data=await response.json(); if(!response.ok) throw new Error(data.error||'Unable to generate a code.'); codeEl.textContent=data.code; result.classList.add('show'); startTimer(data.expiresIn||120); setStatus('Your pairing code is ready.','success'); }catch(error){ setStatus(error.message,'error'); }finally{ button.disabled=false; button.textContent='Generate pairing code'; } });
+    copyBtn.addEventListener('click',async()=>{ try{ await navigator.clipboard.writeText(codeEl.textContent); copyBtn.textContent='Copied'; copyBtn.classList.add('copied'); setTimeout(()=>{copyBtn.textContent='Copy';copyBtn.classList.remove('copied');},1800); }catch(_){ setStatus('Copy is unavailable. Please copy the code manually.','error'); } });
+  </script>
+</body>
+</html>
