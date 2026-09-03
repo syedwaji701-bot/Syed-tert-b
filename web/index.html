@@ -1,0 +1,859 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#030108" />
+  <meta name="description" content="Syed MD WhatsApp Web Pairing Portal" />
+  <title>Syed MD — Premium Pairing Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #030108;
+      --bg-elevated: #0a0214;
+      --ink: #f5e6ff;
+      --muted: #8a6a8a;
+      --pink: #ff006e;
+      --pink-soft: rgba(255,0,110,0.12);
+      --purple: #8338ec;
+      --purple-soft: rgba(131,56,236,0.12);
+      --cyan: #00f5ff;
+      --cyan-soft: rgba(0,245,255,0.08);
+      --green: #00ff88;
+      --red: #ff3366;
+      --gold: #ffd700;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { min-width: 320px; background: var(--bg); scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: 'Inter', system-ui, sans-serif;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ===== CANVAS BG ===== */
+    #starfield {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ===== MOUSE SPOTLIGHT ===== */
+    .spotlight {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: radial-gradient(600px circle at var(--x,50%) var(--y,50%), rgba(131,56,236,0.06), transparent 40%);
+    }
+
+    /* ===== NOISE OVERLAY ===== */
+    .noise {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* ===== GRADIENT ORBS ===== */
+    .orb-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .orb-layer .glow {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+    }
+    .glow-a { width: 800px; height: 800px; top: -400px; right: -300px; background: radial-gradient(circle, rgba(255,0,110,0.15), transparent 60%); animation: orbDrift1 25s ease-in-out infinite; }
+    .glow-b { width: 700px; height: 700px; bottom: -350px; left: -250px; background: radial-gradient(circle, rgba(131,56,236,0.13), transparent 60%); animation: orbDrift2 30s ease-in-out infinite; }
+    .glow-c { width: 500px; height: 500px; top: 30%; left: 40%; background: radial-gradient(circle, rgba(0,245,255,0.06), transparent 55%); animation: orbDrift3 20s ease-in-out infinite; }
+    @keyframes orbDrift1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-80px,60px)} }
+    @keyframes orbDrift2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(60px,-80px)} }
+    @keyframes orbDrift3 { 0%,100%{transform:translate(0,0)scale(1)} 50%{transform:translate(-40px,30px)scale(1.15)} }
+
+    /* ===== LAYOUT ===== */
+    .app {
+      position: relative;
+      z-index: 10;
+      width: min(1200px, 100%);
+      margin: 0 auto;
+      padding: 0 28px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    /* ===== NAV ===== */
+    .nav {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 28px 0;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .nav-logo {
+      width: 42px; height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--pink), var(--purple));
+      display: grid;
+      place-items: center;
+      font: 800 16px 'Inter',sans-serif;
+      color: #fff;
+      box-shadow: 0 0 30px rgba(255,0,110,0.3), 0 0 60px rgba(131,56,236,0.15);
+      position: relative;
+      overflow: hidden;
+    }
+    .nav-logo::after {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      border-radius: 10px;
+      background: var(--bg);
+    }
+    .nav-logo span { position: relative; z-index: 1; background: linear-gradient(135deg, var(--pink), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 18px; }
+    .nav-title { line-height: 1.25; }
+    .nav-title .n1 { font-size: 15px; font-weight: 800; letter-spacing: 0.04em; }
+    .nav-title .n2 { display: block; font-size: 9px; font-weight: 500; color: var(--muted); letter-spacing: 0.22em; text-transform: uppercase; margin-top: 2px; }
+    .nav-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 99px;
+      background: rgba(0,255,136,0.06);
+      border: 1px solid rgba(0,255,136,0.12);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--green);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .nav-badge::before {
+      content: '';
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 12px var(--green);
+      animation: pulseDot 2.5s ease-in-out infinite;
+    }
+    @keyframes pulseDot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(1.5)} }
+
+    /* ===== HERO GRID ===== */
+    .hero {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 80px;
+      align-items: center;
+      padding: 90px 0 50px;
+    }
+
+    /* ===== LEFT ===== */
+    .hero-left { position: relative; }
+    .hero-watermark {
+      position: absolute;
+      top: -50px; left: -30px;
+      font: 900 160px 'Inter',sans-serif;
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(255,0,110,0.06);
+      letter-spacing: -0.05em;
+      line-height: 1;
+      pointer-events: none;
+      user-select: none;
+    }
+    .hero-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 28px;
+      padding: 7px 16px;
+      border-radius: 99px;
+      background: linear-gradient(135deg, var(--pink-soft), var(--purple-soft));
+      border: 1px solid rgba(255,0,110,0.12);
+      font: 500 10px 'JetBrains Mono',monospace;
+      color: var(--pink);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .hero-pill .dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--pink);
+      box-shadow: 0 0 8px var(--pink);
+      animation: dotBlink 2s ease-in-out infinite;
+    }
+    @keyframes dotBlink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .hero-h1 {
+      font-size: clamp(44px, 5.2vw, 70px);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.035em;
+      margin-bottom: 22px;
+    }
+    .hero-h1 .grad {
+      background: linear-gradient(135deg, var(--pink), var(--purple), var(--cyan), var(--pink));
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradFlow 6s ease infinite;
+    }
+    @keyframes gradFlow {
+      0%{background-position:0% 50%}
+      50%{background-position:100% 50%}
+      100%{background-position:0% 50%}
+    }
+    .hero-p {
+      font-size: 15.5px;
+      line-height: 1.75;
+      color: var(--muted);
+      max-width: 440px;
+      margin-bottom: 36px;
+      font-weight: 400;
+    }
+    .hero-stats {
+      display: flex;
+      gap: 40px;
+    }
+    .h-stat { display: flex; flex-direction: column; gap: 5px; }
+    .h-stat .val {
+      font: 800 32px 'Inter',sans-serif;
+      background: linear-gradient(135deg, var(--pink), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+    }
+    .h-stat .lab {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    /* ===== RIGHT CARD ===== */
+    .hero-right { perspective: 1200px; }
+    .card-3d {
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.1s ease-out;
+    }
+    .card-glow-ring {
+      position: absolute;
+      inset: -3px;
+      border-radius: 32px;
+      background: linear-gradient(135deg, var(--pink), var(--purple), var(--cyan), var(--pink));
+      background-size: 400% 400%;
+      animation: ringSpin 8s linear infinite;
+      filter: blur(8px);
+      opacity: 0.5;
+    }
+    @keyframes ringSpin {
+      0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%}
+    }
+    .card-glow-ring::after {
+      content: '';
+      position: absolute;
+      inset: -20px;
+      border-radius: 48px;
+      background: linear-gradient(135deg, var(--pink), var(--purple));
+      filter: blur(40px);
+      opacity: 0.15;
+      animation: ringSpin 8s linear infinite reverse;
+    }
+    .card-body {
+      position: relative;
+      padding: 40px;
+      border-radius: 30px;
+      background: linear-gradient(165deg, rgba(20,6,38,0.97), rgba(6,2,14,0.97));
+      border: 1px solid rgba(255,255,255,0.04);
+      overflow: hidden;
+      backdrop-filter: blur(40px);
+    }
+    .card-body::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,0,110,0.4), rgba(131,56,236,0.4), transparent);
+    }
+    .card-body::after {
+      content: '';
+      position: absolute;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: radial-gradient(circle at 25% 20%, rgba(255,0,110,0.05), transparent 45%),
+                  radial-gradient(circle at 75% 80%, rgba(131,56,236,0.04), transparent 45%);
+      pointer-events: none;
+    }
+    .card-head {
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 30px;
+      z-index: 1;
+    }
+    .card-head .ch-sub {
+      font: 500 10px 'JetBrains Mono',monospace;
+      color: var(--muted);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 7px;
+    }
+    .card-head .ch-title {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #fff, var(--pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .card-head .ch-icon {
+      width: 50px; height: 50px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(255,0,110,0.12), rgba(131,56,236,0.08));
+      border: 1px solid rgba(255,0,110,0.15);
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      color: var(--pink);
+      box-shadow: 0 0 25px rgba(255,0,110,0.08);
+    }
+
+    /* Form */
+    .form-el { margin-bottom: 22px; position: relative; z-index: 1; }
+    .form-el label {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #c8a8c0;
+      letter-spacing: 0.01em;
+    }
+    .input-box {
+      display: flex;
+      align-items: center;
+      border: 1.5px solid rgba(255,255,255,0.06);
+      border-radius: 18px;
+      background: rgba(255,255,255,0.02);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    .input-box::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 10%; right: 10%;
+      height: 1.5px;
+      background: linear-gradient(90deg, transparent, var(--pink), var(--purple), transparent);
+      transform: scaleX(0);
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .input-box:focus-within {
+      border-color: rgba(255,0,110,0.25);
+      background: rgba(255,0,110,0.02);
+      box-shadow: 0 0 0 3px rgba(255,0,110,0.04), 0 20px 50px rgba(255,0,110,0.06);
+    }
+    .input-box:focus-within::before { transform: scaleX(1); }
+    .input-box .pre {
+      padding: 0 16px;
+      color: var(--purple);
+      font: 600 15px 'JetBrains Mono',monospace;
+      border-right: 1px solid rgba(255,255,255,0.05);
+    }
+    .input-box input {
+      flex: 1;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      padding: 17px 16px;
+      color: #fff;
+      background: transparent;
+      font: 500 15px 'JetBrains Mono',monospace;
+      letter-spacing: 0.03em;
+    }
+    .input-box input::placeholder { color: #4a2a42; }
+    .form-hint {
+      margin-top: 9px;
+      font-size: 11px;
+      color: #5a3a50;
+      line-height: 1.5;
+      font-weight: 400;
+    }
+
+    /* CTA Button */
+    .cta-btn {
+      position: relative;
+      width: 100%;
+      padding: 18px 22px;
+      border: 0;
+      border-radius: 18px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--pink), var(--purple));
+      font: 700 14px 'Inter',sans-serif;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      overflow: hidden;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 10px 40px rgba(255,0,110,0.25), 0 0 0 1px rgba(255,255,255,0.05) inset;
+      z-index: 1;
+    }
+    .cta-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .cta-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 50px rgba(255,0,110,0.4), 0 0 0 1px rgba(255,255,255,0.08) inset;
+    }
+    .cta-btn:hover::before { transform: translateX(100%); }
+    .cta-btn:active { transform: translateY(-1px) scale(0.985); }
+    .cta-btn:disabled {
+      opacity: 0.4;
+      cursor: wait;
+      transform: none;
+      box-shadow: none;
+    }
+    .cta-btn .cta-in {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      position: relative;
+      z-index: 2;
+    }
+    .cta-btn .cta-arrow {
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .cta-btn:hover .cta-arrow { transform: translateX(6px); }
+
+    /* Status */
+    .status-line {
+      min-height: 20px;
+      margin-top: 18px;
+      font-size: 12px;
+      font-weight: 500;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    .status-line.s { color: var(--green); }
+    .status-line.e { color: var(--red); }
+    .status-line.l { color: var(--muted); }
+
+    /* Result */
+    .result-card {
+      display: none;
+      margin-top: 22px;
+      padding: 22px;
+      border: 1px solid rgba(0,255,136,0.15);
+      border-radius: 20px;
+      background: linear-gradient(165deg, rgba(0,255,136,0.04), rgba(0,255,136,0.01));
+      position: relative;
+      z-index: 1;
+      animation: resultPop 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .result-card.show { display: block; }
+    @keyframes resultPop {
+      from { opacity: 0; transform: translateY(16px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .result-card .rc-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .result-card .rc-top .rc-ok {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--green);
+    }
+    .result-card .rc-top .rc-ok::before {
+      content: '';
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 12px var(--green);
+      animation: livePulse 2s ease-in-out infinite;
+    }
+    .result-card .rc-top .rc-time {
+      font: 600 12px 'JetBrains Mono',monospace;
+      color: #6ab88a;
+      padding: 5px 12px;
+      border-radius: 10px;
+      background: rgba(0,255,136,0.06);
+      border: 1px solid rgba(0,255,136,0.1);
+    }
+    .result-card .rc-code-row {
+      display: flex;
+      gap: 10px;
+    }
+    .result-card .rc-code-val {
+      flex: 1;
+      padding: 18px 12px;
+      border-radius: 16px;
+      background: rgba(0,0,0,0.45);
+      border: 1px solid rgba(0,255,136,0.1);
+      text-align: center;
+      font: 700 26px 'JetBrains Mono',monospace;
+      letter-spacing: 0.2em;
+      color: #fff;
+      text-shadow: 0 0 25px rgba(0,255,136,0.25);
+    }
+    .result-card .rc-copy {
+      padding: 0 22px;
+      border: 1px solid rgba(0,255,136,0.2);
+      border-radius: 16px;
+      background: rgba(0,255,136,0.06);
+      color: var(--green);
+      font: 700 12px 'Inter',sans-serif;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      white-space: nowrap;
+    }
+    .result-card .rc-copy:hover {
+      background: rgba(0,255,136,0.12);
+      box-shadow: 0 0 25px rgba(0,255,136,0.1);
+    }
+    .result-card .rc-copy.done {
+      background: var(--green);
+      color: #052818;
+      border-color: var(--green);
+      font-weight: 800;
+    }
+
+    /* Guide */
+    .guide {
+      margin-top: 20px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255,255,255,0.04);
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      position: relative;
+      z-index: 1;
+    }
+    .guide .g-icon {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,0,110,0.2);
+      display: grid;
+      place-items: center;
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--pink);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .guide p {
+      font-size: 11px;
+      line-height: 1.7;
+      color: #6a4a5a;
+      font-weight: 400;
+    }
+    .guide p strong { color: #a08098; font-weight: 600; }
+
+    /* Footer */
+    .site-foot {
+      position: relative;
+      z-index: 10;
+      padding: 22px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font: 10px 'JetBrains Mono',monospace;
+      color: #3a1a32;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border-top: 1px solid rgba(255,255,255,0.03);
+    }
+    .site-foot span:last-child { color: #5a2a48; }
+
+    /* Quote */
+    .quote-line {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 14px;
+      font: italic 500 11px Georgia,serif;
+      color: rgba(245,230,255,0.2);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; gap: 50px; padding: 100px 0 30px; }
+      .hero-left { text-align: center; }
+      .hero-p { margin-left: auto; margin-right: auto; }
+      .hero-stats { justify-content: center; }
+      .hero-watermark { font-size: 100px; top: -30px; left: 50%; transform: translateX(-50%); }
+      .hero-right { max-width: 480px; margin: 0 auto; width: 100%; }
+    }
+    @media (max-width: 500px) {
+      .app { padding: 0 18px; }
+      .nav { padding: 20px 0; }
+      .card-body { padding: 28px 22px; border-radius: 24px; }
+      .card-glow-ring { border-radius: 26px; }
+      .hero-h1 { font-size: clamp(36px, 11vw, 52px); }
+      .site-foot { flex-direction: column; gap: 6px; text-align: center; padding: 18px 20px; }
+      .hero-stats { gap: 28px; }
+      .h-stat .val { font-size: 26px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="starfield"></canvas>
+  <div class="orb-layer">
+    <div class="glow glow-a"></div>
+    <div class="glow glow-b"></div>
+    <div class="glow glow-c"></div>
+  </div>
+  <div class="spotlight" id="spotlight"></div>
+  <div class="noise"></div>
+
+  <div class="quote-line">Allah is with me, who has the courage to defeat me?</div>
+
+  <div class="app">
+    <nav class="nav">
+      <div class="nav-brand">
+        <div class="nav-logo"><span>S</span></div>
+        <div class="nav-title">
+          <div class="n1">SYED MD</div>
+          <div class="n2">Premium Pairing Portal</div>
+        </div>
+      </div>
+      <div class="nav-badge">System Online</div>
+    </nav>
+
+    <div class="hero">
+      <div class="hero-left">
+        <div class="hero-watermark">PAIR</div>
+        <div class="hero-pill"><div class="dot"></div>Secure Connection Layer</div>
+        <h1 class="hero-h1">Pair your<br><span class="grad">WhatsApp.</span></h1>
+        <p class="hero-p">Enter your WhatsApp number and receive a pairing code in seconds. The original pairing method stays untouched — only the experience is now cleaner, faster, and completely web-based.</p>
+        <div class="hero-stats">
+          <div class="h-stat"><span class="val">2s</span><span class="lab">Response</span></div>
+          <div class="h-stat"><span class="val">99.9%</span><span class="lab">Uptime</span></div>
+          <div class="h-stat"><span class="val">24/7</span><span class="lab">Live</span></div>
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <div class="card-3d" id="card3d">
+          <div class="card-glow-ring"></div>
+          <div class="card-body">
+            <div class="card-head">
+              <div>
+                <div class="ch-sub">Start a new session</div>
+                <div class="ch-title">Connect your number</div>
+              </div>
+              <div class="ch-icon">✦</div>
+            </div>
+
+            <form id="pairForm">
+              <div class="form-el">
+                <label for="number">WhatsApp number</label>
+                <div class="input-box">
+                  <span class="pre">+</span>
+                  <input id="number" name="number" inputmode="numeric" autocomplete="tel" maxlength="15" placeholder="923001234567" required />
+                </div>
+                <p class="form-hint">Use the international format without spaces or a leading zero.</p>
+              </div>
+              <button class="cta-btn" id="pairBtn" type="submit">
+                <span class="cta-in">Generate pairing code<span class="cta-arrow">→</span></span>
+              </button>
+            </form>
+
+            <div id="status" class="status-line" role="status" aria-live="polite"></div>
+
+            <div id="result" class="result-card">
+              <div class="rc-top">
+                <span class="rc-ok">Pairing code ready</span>
+                <span id="timer" class="rc-time">02:00</span>
+              </div>
+              <div class="rc-code-row">
+                <div id="code" class="rc-code-val">----</div>
+                <button id="copyBtn" class="rc-copy" type="button">Copy</button>
+              </div>
+            </div>
+
+            <div class="guide">
+              <div class="g-icon">i</div>
+              <p>Open <strong>WhatsApp</strong> → Settings → Linked Devices → Link a Device, then enter the code above. The code expires in <strong>2 minutes</strong>.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-foot">
+    <span>Syed MD / Premium Interface</span>
+    <span>Built for a seamless connection</span>
+  </footer>
+
+  <script>
+    // ===== STARFIELD =====
+    const canvas = document.getElementById('starfield');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    for (let i = 0; i < 150; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.2 + 0.2,
+        speed: Math.random() * 0.3 + 0.05,
+        opacity: Math.random(),
+        fadeSpeed: Math.random() * 0.01 + 0.003
+      });
+    }
+    function drawStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      stars.forEach(s => {
+        s.opacity += s.fadeSpeed;
+        if (s.opacity > 1 || s.opacity < 0.1) s.fadeSpeed *= -1;
+        s.y -= s.speed;
+        if (s.y < 0) { s.y = canvas.height; s.x = Math.random() * canvas.width; }
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 230, 255, ${s.opacity * 0.6})`;
+        ctx.fill();
+      });
+      requestAnimationFrame(drawStars);
+    }
+    drawStars();
+
+    // ===== MOUSE SPOTLIGHT =====
+    const spotlight = document.getElementById('spotlight');
+    document.addEventListener('mousemove', e => {
+      spotlight.style.setProperty('--x', e.clientX + 'px');
+      spotlight.style.setProperty('--y', e.clientY + 'px');
+    });
+
+    // ===== 3D CARD TILT =====
+    const card3d = document.getElementById('card3d');
+    const cardBody = card3d.querySelector('.card-body');
+    card3d.addEventListener('mousemove', e => {
+      const rect = card3d.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const cx = rect.width / 2;
+      const cy = rect.height / 2;
+      const rx = (y - cy) / cy * -6;
+      const ry = (x - cx) / cx * 6;
+      card3d.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+    });
+    card3d.addEventListener('mouseleave', () => {
+      card3d.style.transform = 'rotateX(0) rotateY(0)';
+    });
+
+    // ===== FORM LOGIC =====
+    const form = document.getElementById('pairForm'),
+      input = document.getElementById('number'),
+      button = document.getElementById('pairBtn'),
+      status = document.getElementById('status'),
+      result = document.getElementById('result'),
+      codeEl = document.getElementById('code'),
+      copyBtn = document.getElementById('copyBtn'),
+      timerEl = document.getElementById('timer');
+    let timer;
+
+    function setStatus(text, type = '') {
+      status.textContent = text;
+      status.className = 'status-line ' + type;
+    }
+
+    function startTimer(seconds) {
+      clearInterval(timer);
+      let left = seconds;
+      const tick = () => {
+        timerEl.textContent = String(Math.floor(left / 60)).padStart(2, '0') + ':' + String(left % 60).padStart(2, '0');
+        if (left <= 0) clearInterval(timer);
+        left--;
+      };
+      tick();
+      timer = setInterval(tick, 1000);
+    }
+
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      result.classList.remove('show');
+      setStatus('Generating your pairing code…', 'l');
+      button.disabled = true;
+      const originalContent = button.innerHTML;
+      button.innerHTML = '<span class="cta-in">Generating…</span>';
+      try {
+        const response = await fetch('/api/pair', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ number: input.value })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Unable to generate a code.');
+        codeEl.textContent = data.code;
+        result.classList.add('show');
+        startTimer(data.expiresIn || 120);
+        setStatus('Your pairing code is ready.', 's');
+      } catch (error) {
+        setStatus(error.message, 'e');
+      } finally {
+        button.disabled = false;
+        button.innerHTML = originalContent;
+      }
+    });
+
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(codeEl.textContent);
+        copyBtn.textContent = 'Copied';
+        copyBtn.classList.add('done');
+        setTimeout(() => { copyBtn.textContent = 'Copy'; copyBtn.classList.remove('done'); }, 1800);
+      } catch (_) {
+        setStatus('Copy is unavailable. Please copy the code manually.', 'e');
+      }
+    });
+  </script>
+</body>
+</html>
